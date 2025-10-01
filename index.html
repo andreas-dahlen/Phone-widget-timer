@@ -16,7 +16,7 @@ html, body {
   position: fixed;
   top: 2%;
   left: 2%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0);
   padding: 12px 20px;
   border-radius: 12px;
   text-align: center;
@@ -115,6 +115,13 @@ if (!timerDisplay) {
     remaining=0;
     updateDisplay();
     timerDisplay.classList.add("flash");
+    // --- VIBRATION ---
+  if (navigator.vibrate) {
+    // Pattern: vibrate 500ms, pause 200ms, vibrate 500ms
+    navigator.vibrate([500, 200, 500]);
+  } else {
+    console.warn("Vibration API not supported on this device.");
+  }
   }
 
   // Click handler with bounce effect
