@@ -52,7 +52,7 @@ html, body {
 <body>
   <div id="timer-container">
     <div id="timer">03:00</div>
-   <p> v.1</p>
+    <p>v.1</p>
   </div>
 
 <script>
@@ -66,34 +66,40 @@ if (!timerDisplay) {
   const TEST_MODE = false; // set false for real 3minutes
   if (TEST_MODE) totalSeconds = 5;
 
+  let endTime = Date.now() + totalSeconds * 1000;
   let remaining = totalSeconds;
   let timer = null;
 
   function updateDisplay() {
-    let mins = String(Math.floor(remaining/60)).padStart(2,"0");
-    let secs = String(remaining%60).padStart(2,"0");
+    remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+
+    let mins = String(Math.floor(remaining / 60)).padStart(2,"0");
+    let secs = String(remaining % 60).padStart(2,"0");
     timerDisplay.textContent = `${mins}:${secs}`;
 
-    if (remaining>60) timerDisplay.style.color="lime";
-    else if (remaining>20) timerDisplay.style.color="orange";
-    else if (remaining>0) timerDisplay.style.color="red";
+    if (remaining > 60) timerDisplay.style.color = "lime";
+    else if (remaining > 20) timerDisplay.style.color = "orange";
+    else if (remaining > 0) timerDisplay.style.color = "red";
+
+    if (remaining <= 0) finishTimer();
   }
 
   function tick() {
-    if (remaining>0) {
-      remaining--;
-      updateDisplay();
-      timer = setTimeout(tick,1000);
-    } else finishTimer();
+    updateDisplay();
+    if (remaining > 0) {
+      timer = setTimeout(tick, 200); // update 5x/sec for smooth display
+    } else {
+      timer = null;
+    }
   }
 
   function startTimer() {
     if (timer) return; // already running
-    if (remaining <= 0) remaining = totalSeconds;
+    endTime = Date.now() + totalSeconds * 1000;
 
     timerDisplay.classList.remove("flash","fade");
     updateDisplay();
-    timer = setTimeout(tick,1000); // first tick after 1s
+    tick(); // start ticking
   }
 
   function resetTimer() {
@@ -101,28 +107,20 @@ if (!timerDisplay) {
       clearTimeout(timer);
       timer = null;
     }
-    remaining = totalSeconds;
-    updateDisplay();
+    endTime = Date.now() + totalSeconds * 1000;
 
     timerDisplay.classList.remove("flash");
     timerDisplay.classList.add("fade");
     setTimeout(()=>timerDisplay.classList.remove("fade"),300);
 
-    startTimer(); // immediately restart
+    startTimer();
   }
 
   function finishTimer() {
-    timer=null;
-    remaining=0;
+    timer = null;
+    remaining = 0;
     updateDisplay();
     timerDisplay.classList.add("flash");
-    // --- VIBRATION ---
-  if (navigator.vibrate) {
-    // Pattern: vibrate 500ms, pause 200ms, vibrate 500ms
-    navigator.vibrate([500, 200, 500]);
-  } else {
-    console.warn("Vibration API not supported on this device.");
-  }
   }
 
   // Click handler with bounce effect
