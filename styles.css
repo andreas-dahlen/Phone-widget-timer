@@ -1,17 +1,38 @@
-body {
+html, body {
   margin: 0;
-  background: transparent;
+  padding: 0;
+  background: transparent !important;
   font-family: monospace;
 }
 
 #timer-container {
   position: fixed;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
+  top: 2%;
+  left: 2%;
+  background: rgba(0,0,0,0.5);
   padding: 12px 20px;
   border-radius: 12px;
   text-align: center;
   font-size: 2rem;
   cursor: pointer;
   user-select: none;
+}
+
+#timer {
+  color: lime;
+  transition: opacity 0.3s, transform 0.3s, color 0.3s;
+}
+}
+
+@keyframes flash-pulse {
+  0%, 100% { color: red; transform: scale(1); }
+  50% { color: white; transform: scale(1.2); }
+}
+
+.flash {
+  animation: flash-pulse 1s infinite;
+}
+
+.fade {
+  opacity: 0;
 }

@@ -1,25 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-</head>
-<body>
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Overlay Timer</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overlay Timer</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  font-family: monospace;
+}
+
+#timer-container {
+  position: fixed;
+  top: 2%;
+  left: 2%;
+  background: rgba(0,0,0,0.5);
+  padding: 12px 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 2rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+#timer {
+  color: lime;
+  transition: opacity 0.3s, transform 0.3s, color 0.3s;
+}
+
+/* End-of-timer flash */
+@keyframes flash-pulse {
+  0%,100% { color: red; transform: scale(1); }
+  50% { color: white; transform: scale(1.2); }
+}
+.flash { animation: flash-pulse 1s infinite; }
+
+/* Fade animation for reset/start */
+.fade { opacity: 0; transition: opacity 0.3s; }
+
+/* Bounce effect on click */
+@keyframes click-bounce {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+.clicked { animation: click-bounce 0.3s ease-in-out; }
+</style>
 </head>
 <body>
   <div id="timer-container">
     <div id="timer">03:00</div>
   </div>
-  
-  <script src="script.js"></script>
+
+<script>
+const timerDisplay = document.getElementById("timer");
+
+if (!timerDisplay) {
+  console.error("Timer element not found!");
+} else {
+
+  let totalSeconds = 180; // 3 minutes
+  const TEST_MODE = true; // set false for real 3min
+  if (TEST_MODE) totalSeconds = 5;
+
+  let remaining = totalSeconds;
+  let timer = null;
+
+  function updateDisplay() {
+    let mins = String(Math.floor(remaining/60)).padStart(2,"0");
+    let secs = String(remaining%60).padStart(2,"0");
+    timerDisplay.textContent = `${mins}:${secs}`;
+
+    if (remaining>60) timerDisplay.style.color="lime";
+    else if (remaining>20) timerDisplay.style.color="orange";
+    else if (remaining>0) timerDisplay.style.color="red";
+  }
+
+  function tick() {
+    if (remaining>0) {
+      remaining--;
+      updateDisplay();
+      timer = setTimeout(tick,1000);
+    } else finishTimer();
+  }
+
+  function startTimer() {
+    if (timer) return; // already running
+    if (remaining <= 0) remaining = totalSeconds;
+
+    timerDisplay.classList.remove("flash","fade");
+    updateDisplay();
+    timer = setTimeout(tick,1000); // first tick after 1s
+  }
+
+  function resetTimer() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    remaining = totalSeconds;
+    updateDisplay();
+
+    timerDisplay.classList.remove("flash");
+    timerDisplay.classList.add("fade");
+    setTimeout(()=>timerDisplay.classList.remove("fade"),300);
+
+    startTimer(); // immediately restart
+  }
+
+  function finishTimer() {
+    timer=null;
+    remaining=0;
+    updateDisplay();
+    timerDisplay.classList.add("flash");
+  }
+
+  // Click handler with bounce effect
+  timerDisplay.addEventListener("click", () => {
+    timerDisplay.classList.add("clicked");
+    setTimeout(()=>timerDisplay.classList.remove("clicked"),300);
+
+    resetTimer();
+  });
+
+  // start automatically
+  startTimer();
+  updateDisplay();
+}
+</script>
 </body>
 </html>
-
